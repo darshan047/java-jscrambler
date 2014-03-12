@@ -1,0 +1,18 @@
+{
+    "connection":{ 
+        "access_key":"YOUR_ACCESS_KEY",
+        "secret_key":"YOUR_SECRET_KEY",
+        "server":"api.jscrambler.com",
+        "port":"443"
+    },
+    
+    "files":[
+        "index.html",
+        "script.js"
+    ],
+    
+    "parameters":{
+        "domain_lock":"jscrambler.com",
+        "expiration_date":"2099/12/31"
+    }
+}
