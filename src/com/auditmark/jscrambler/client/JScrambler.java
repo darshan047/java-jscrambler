@@ -318,6 +318,7 @@ public class JScrambler {
             encodedStr = java.net.URLEncoder.encode(data, "UTF-8");
             encodedStr = encodedStr.replace("%7E", "~");
             encodedStr = encodedStr.replace("+", "%20");
+            encodedStr = encodedStr.replace("*", "%2A");
         } catch (UnsupportedEncodingException e) {
             throw e;
         }
