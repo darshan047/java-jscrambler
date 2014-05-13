@@ -17,7 +17,7 @@ java-jscrambler
    API
    ---
 
-   > JScramblerFacade.process('config.json');
+   > JScramblerFacade.process("config.json");
 
 
 Requirements
