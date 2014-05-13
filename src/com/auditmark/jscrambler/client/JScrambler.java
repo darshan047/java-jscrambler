@@ -1,5 +1,5 @@
 /*
- * Copyright 2013, 2013 AuditMark
+ * Copyright 2014, 2014 AuditMark
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -54,12 +54,23 @@ public class JScrambler {
 
     public JScrambler(String accessKey, String secretKey, String apiHost) {
         this(accessKey, secretKey);
-        this.apiHost = apiHost;
+        if (apiHost != null) {
+          this.apiHost = apiHost;
+        }
     }
 
-    public JScrambler(String accessKey, String secretKey, String apiHost, int apiPort) {
+    public JScrambler(String accessKey, String secretKey, String apiHost, Integer apiPort) {
         this(accessKey, secretKey, apiHost);
-        this.apiPort = apiPort;
+        if (apiPort != null) {
+          this.apiPort = apiPort;
+        }
+    }
+    
+    public JScrambler(String accessKey, String secretKey, String apiHost, Integer apiPort, Integer apiVersion) {
+        this(accessKey, secretKey, apiHost, apiPort);
+        if (apiVersion != null) {
+          this.apiVersion = apiVersion;
+        }
     }
 
     /**
