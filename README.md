@@ -10,7 +10,7 @@ java-jscrambler
 
    CLI
    ---
-   > java jscrambler-client.jar config.json
+   > java -jar jscrambler-client.jar config.json
 
    OR
 
