@@ -179,7 +179,10 @@ public class JScramblerFacade {
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
           if (matcher.matches(file)) {
-            filesSrc.add(workingPath.relativize(file).toString());
+            String filePath = workingPath.relativize(file).toString();
+            if (!filesSrc.contains(filePath)) {
+              filesSrc.add(filePath);
+            }
           }
           return FileVisitResult.CONTINUE;
         }
