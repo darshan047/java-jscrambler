@@ -110,10 +110,14 @@ public class JScramblerFacade {
     }
   }
 
-  public static JSONObject uploadCode(JScrambler client, Map<String, Object> params) throws JSONException {
+  public static JSONObject uploadCode(JScrambler client, Map<String, Object> params) throws JSONException, IOException {
     if (!JScramblerFacade.silent) {
       System.out.println("Uploading project...");
     }
+    // Zip all files before uploading
+    JScramblerFacade.zipProject((List<String>) params.get("files"));
+    params.put("files", new String[]{JScramblerFacade.ZIP_TMP_FILE});
+    // Upload
     String response = client.post("/code.json", params);
     JSONObject object = new JSONObject(response);
     if (!JScramblerFacade.silent) {
@@ -172,8 +176,11 @@ public class JScramblerFacade {
     String dest = config.getString("filesDest");
     final List<String> filesSrc = new ArrayList<>();
     for (int i = 0, l = files.length(); i < l; ++i) {
-      String file = (String) files.get(i);
-      final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**/" + file);
+      String origFile = (String) files.get(i);
+      if (origFile.startsWith("./")) {
+        origFile = origFile.substring(2);
+      }
+      final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**/" + origFile);
       final Path workingPath = Paths.get(System.getProperty("user.dir"));
       Files.walkFileTree(workingPath, new SimpleFileVisitor<Path>() {
         @Override
@@ -209,9 +216,7 @@ public class JScramblerFacade {
         params.put(paramKey, paramsJSON.getString(paramKey));
       }
     }
-    // Zip all files before uploading
-    JScramblerFacade.zipProject(filesSrc);
-    params.put("files", new String[]{JScramblerFacade.ZIP_TMP_FILE});
+    params.put("files", filesSrc);
     // Send the project to the JScrambler API
     String projectId = (String) JScramblerFacade.uploadCode(client, params).getString("id");
     // Clean the temporary zip file
@@ -262,23 +267,29 @@ public class JScramblerFacade {
   }
 
   protected static void zipProject(List<String> files) throws FileNotFoundException, IOException {
-    try (FileOutputStream fos = new FileOutputStream(JScramblerFacade.ZIP_TMP_FILE);
-         ZipOutputStream zos = new ZipOutputStream(fos)) {
-      for (String filePath : files) {
-        File file = new File(filePath);
-        try (FileInputStream fis = new FileInputStream(file)) {
-          ZipEntry zipEntry = new ZipEntry(filePath);
-          zos.putNextEntry(zipEntry);
-          
-          byte[] bytes = new byte[1024];
-          int length;
-          while ((length = fis.read(bytes)) >= 0) {
-            zos.write(bytes, 0, length);
+    if (files.size() == 1 && files.get(0).endsWith(".zip")) {
+      try (FileOutputStream fos = new FileOutputStream(JScramblerFacade.ZIP_TMP_FILE);
+           FileInputStream fis = new FileInputStream(files.get(0))) {
+        fos.getChannel().transferFrom(fis.getChannel(), 0, fis.getChannel().size());
+      }
+    } else {
+      try (FileOutputStream fos = new FileOutputStream(JScramblerFacade.ZIP_TMP_FILE);
+           ZipOutputStream zos = new ZipOutputStream(fos)) {
+        for (String filePath : files) {
+          File file = new File(filePath);
+          try (FileInputStream fis = new FileInputStream(file)) {
+            ZipEntry zipEntry = new ZipEntry(filePath);
+            zos.putNextEntry(zipEntry);
+
+            byte[] bytes = new byte[1024];
+            int length;
+            while ((length = fis.read(bytes)) >= 0) {
+              zos.write(bytes, 0, length);
+            }
+            zos.closeEntry();
           }
-          zos.closeEntry();
         }
       }
-      
     }
   }
 
