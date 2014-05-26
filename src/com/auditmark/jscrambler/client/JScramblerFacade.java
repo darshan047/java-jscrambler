@@ -267,9 +267,11 @@ public class JScramblerFacade {
   }
 
   protected static void zipProject(List<String> files) throws FileNotFoundException, IOException {
+    boolean hasFiles = false;
     if (files.size() == 1 && files.get(0).endsWith(".zip")) {
       try (FileOutputStream fos = new FileOutputStream(JScramblerFacade.ZIP_TMP_FILE);
            FileInputStream fis = new FileInputStream(files.get(0))) {
+        hasFiles = true;
         fos.getChannel().transferFrom(fis.getChannel(), 0, fis.getChannel().size());
       }
     } else {
@@ -277,19 +279,35 @@ public class JScramblerFacade {
            ZipOutputStream zos = new ZipOutputStream(fos)) {
         for (String filePath : files) {
           File file = new File(filePath);
-          try (FileInputStream fis = new FileInputStream(file)) {
+          if (file.isDirectory()) {
             ZipEntry zipEntry = new ZipEntry(filePath);
             zos.putNextEntry(zipEntry);
-
-            byte[] bytes = new byte[1024];
-            int length;
-            while ((length = fis.read(bytes)) >= 0) {
-              zos.write(bytes, 0, length);
-            }
             zos.closeEntry();
+          } else {
+            try (FileInputStream fis = new FileInputStream(file)) {
+              ZipEntry zipEntry = new ZipEntry(filePath);
+              zos.putNextEntry(zipEntry);
+
+              byte[] bytes = new byte[1024];
+              int length;
+              while ((length = fis.read(bytes)) >= 0) {
+                zos.write(bytes, 0, length);
+              }
+              zos.closeEntry();
+              hasFiles = true;
+            }
           }
         }
+      } catch (FileNotFoundException ex) {
+        if (ex.getMessage().contains("Is a directory")) {
+          throw new FileNotFoundException("No source files found. If you intend to send a whole directory sufix your path with \"**\" (e.g. ./my-directory/**)");
+        } else {
+          throw ex;
+        }
       }
+    }
+    if (!hasFiles) {
+      throw new FileNotFoundException("No source files found. If you intend to send a whole directory sufix your path with \"**\" (e.g. ./my-directory/**)");
     }
   }
 
