@@ -222,6 +222,7 @@ public class JScrambler {
         }
         params.put("timestamp", (timestamp != null ? timestamp : (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")).format(new Date()).toString()));
         params.put("access_key", accessKey);
+        params.put("user_agent", "Java");
         params.put("signature", generateHMACSignature(requestMethod, resourcePath, params));
         return params;
     }
