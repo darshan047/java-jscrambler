@@ -180,30 +180,70 @@ public class JScramblerFacade {
       if (origFile.startsWith("./")) {
         origFile = origFile.substring(2);
       }
-      final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**/" + origFile);
-      final Path workingPath = Paths.get(System.getProperty("user.dir"));
-      Files.walkFileTree(workingPath, new SimpleFileVisitor<Path>() {
-        @Override
-        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-          if (matcher.matches(file)) {
-            String filePath = workingPath.relativize(file).toString();
-            if (!filesSrc.contains(filePath)) {
-              filesSrc.add(filePath);
-            }
-          }
-          return FileVisitResult.CONTINUE;
-        }
+      String globPattern = origFile;
+      if (globPattern.startsWith("/")) {
+        globPattern = "glob:**" + globPattern;
+      } else {
+        globPattern = "glob:**/" + globPattern;
+      }
+      final PathMatcher matcher = FileSystems.getDefault().getPathMatcher(globPattern);
 
-        @Override
-        public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-          return FileVisitResult.CONTINUE;
+      final Path workingPath = Paths.get(System.getProperty("user.dir"));
+      final File crawlFile = new File(origFile);
+      Path crawlPath = null;
+      if (crawlFile.isFile()) {
+        Path pathToAdd = Paths.get(origFile);
+        if (pathToAdd.startsWith("../")) {
+          pathToAdd = pathToAdd.toAbsolutePath().normalize();
         }
-        
-        @Override
-        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
-          return FileVisitResult.CONTINUE;
+        filesSrc.add(pathToAdd.toString());
+        continue;
+      } else if (crawlFile.isDirectory()) {
+        crawlPath = crawlFile.toPath();
+      } else {
+        String tmpFile = origFile;
+        int starIndex;
+        while (true) {
+          starIndex = tmpFile.indexOf("*");
+          if (starIndex > 0 && !"\\".equals(tmpFile.charAt(starIndex - 1))) {
+            tmpFile = tmpFile.substring(starIndex);
+          } else {
+            break;
+          }
         }
-      });
+        int offset = origFile.length() - tmpFile.length();
+        if (offset != 0) {
+          crawlPath = new File(origFile.substring(0, offset)).toPath();
+        } else {
+          crawlPath = crawlFile.toPath();
+        }
+      }
+      Files.walkFileTree(crawlPath, new SimpleFileVisitor<Path>() {
+          @Override
+          public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            if (matcher.matches(file)) {
+              Path sanitizedPath = file;
+              if (sanitizedPath.startsWith("../")) {
+                sanitizedPath = sanitizedPath.toAbsolutePath().normalize();
+              }
+              String filePath = sanitizedPath.toString();
+              if (!filesSrc.contains(filePath)) {
+                filesSrc.add(filePath);
+              }
+            }
+            return FileVisitResult.CONTINUE;
+          }
+
+          @Override
+          public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+            return FileVisitResult.CONTINUE;
+          }
+
+          @Override
+          public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+            return FileVisitResult.CONTINUE;
+          }
+        });
     }
     // Prepare object to post
     // Check if params were provided
