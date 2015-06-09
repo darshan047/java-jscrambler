@@ -120,18 +120,24 @@ public class JScramblerFacade {
     // Upload
     String response = client.post("/code.json", params);
     JSONObject object = new JSONObject(response);
+    if (object.has("error")) {
+      throw new IOException((String) object.get("message"));
+    }
     if (!JScramblerFacade.silent) {
       System.out.println("Project uploaded");
     }
     return object;
   }
 
-  public static JSONObject deleteCode(JScrambler client, String projectId) throws JSONException {
+  public static JSONObject deleteCode(JScrambler client, String projectId) throws JSONException, IOException {
     if (!JScramblerFacade.silent) {
       System.out.println("Deleting project...");
     }
     String response = (String) client.delete("/code/" + projectId + ".zip");
     JSONObject result = new JSONObject(response);
+    if (result.has("error")) {
+      throw new IOException((String) result.get("message"));
+    }
     if (!JScramblerFacade.silent) {
       System.out.println("Project deleted");
     }
@@ -359,9 +365,9 @@ public class JScramblerFacade {
     }
     try (ZipInputStream zis = new ZipInputStream(zipContent)) {
       ZipEntry ze = zis.getNextEntry();
-      
+
       while (ze != null) {
-        
+
         String fileName = ze.getName();
         File newFile = new File(dest + File.separator + fileName);
         new File(newFile.getParent()).mkdirs();
