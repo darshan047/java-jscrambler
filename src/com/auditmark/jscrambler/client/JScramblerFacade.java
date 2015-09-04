@@ -164,9 +164,9 @@ public class JScramblerFacade {
     if (config.has("port")) {
       port = config.getInt("port");
     }
-    Integer apiVersion = null;
+    String apiVersion = null;
     if (config.has("apiVersion")) {
-      apiVersion = config.getInt("apiVersion");
+      apiVersion = config.getString("apiVersion");
     }
     // Instance a JScrambler client
     JScrambler client = new JScrambler(accessKey, secretKey, host, port, apiVersion);

@@ -41,15 +41,15 @@ public class JScrambler {
     private String accessKey,
                    secretKey,
                    apiHost;
-    private int apiPort,
-                apiVersion;
+    private int apiPort;
+    private String apiVersion;
 
     public JScrambler(String accessKey, String secretKey) {
         this.accessKey = accessKey;
         this.secretKey = secretKey;
         apiHost = "api.jscrambler.com";
         apiPort = 80;
-        this.apiVersion = 3;
+        this.apiVersion = "3.7";
     }
 
     public JScrambler(String accessKey, String secretKey, String apiHost) {
@@ -65,8 +65,8 @@ public class JScrambler {
           this.apiPort = apiPort;
         }
     }
-    
-    public JScrambler(String accessKey, String secretKey, String apiHost, Integer apiPort, Integer apiVersion) {
+
+    public JScrambler(String accessKey, String secretKey, String apiHost, Integer apiPort, String apiVersion) {
         this(accessKey, secretKey, apiHost, apiPort);
         if (apiVersion != null) {
           this.apiVersion = apiVersion;
@@ -76,10 +76,10 @@ public class JScrambler {
     /**
      * If the content-type of the response equals application/zip returns an
      * inputstream. Otherwise returns a string.
-     * 
+     *
      * @param resourcePath
      * @param params
-     * @return 
+     * @return
      */
     public Object get(String resourcePath, Map params) {
         try {
@@ -89,11 +89,11 @@ public class JScrambler {
             return null;
         }
     }
-    
+
     public Object get(String resourcePath) {
         return get(resourcePath, null);
     }
-    
+
 
     public String post(String resourcePath, Map params) {
         try {
@@ -112,7 +112,7 @@ public class JScrambler {
             return null;
         }
     }
-    
+
     public String delete(String resourcePath) {
         return delete(resourcePath, null);
     }
@@ -129,8 +129,8 @@ public class JScrambler {
         if (requestMethod.toUpperCase().equals("POST") && params.isEmpty()) {
             throw new IllegalArgumentException("Parameters missing for POST request.");
         }
-        
-        String[] files = null; 
+
+        String[] files = null;
 
         if(params == null) {
             params = new TreeMap();
@@ -143,7 +143,7 @@ public class JScrambler {
             }
             params = new TreeMap(params);
         }
-        
+
         if (requestMethod.toUpperCase().equals("POST")) {
             signedData = signedQuery(requestMethod, resourcePath, params, null);
         } else {
@@ -158,7 +158,7 @@ public class JScrambler {
             if (signedData != null && requestMethod.toUpperCase().equals("POST")) {
                 HttpPost httppost = new HttpPost(apiURL() + resourcePath + (urlQueryPart != null ? urlQueryPart : ""));
                 MultipartEntity reqEntity = new MultipartEntity();
-                
+
                 if (files != null) {
                     int n = 0;
                     for (String filename : files) {
@@ -166,7 +166,7 @@ public class JScrambler {
                         reqEntity.addPart("file_" + n++, fb);
                     }
                 }
-                
+
                 for (String param : (Set<String>) params.keySet()) {
                     if (param.equals("files") || param.startsWith("file_")) {
                         continue;
@@ -175,7 +175,7 @@ public class JScrambler {
                         reqEntity.addPart(param, new StringBody((String) params.get(param)));
                     }
                 }
-                
+
                 httppost.setEntity(reqEntity);
                 response = httpclient.execute(httppost);
 
@@ -199,14 +199,14 @@ public class JScrambler {
                 return httpEntity.getContent();
             }
             // Otherwise return string
-            return 
+            return
 		EntityUtils.toString(httpEntity, "UTF-8");
 
         } catch (IOException e) {
             throw e;
         } catch (Exception e) {
             throw e;
-        } 
+        }
     }
 
     private String signedQuery(String requestMethod, String resourcePath, Map params, SimpleDateFormat timestamp) throws FileNotFoundException, InvalidKeyException, NoSuchAlgorithmException, IOException, Exception {
@@ -226,7 +226,7 @@ public class JScrambler {
         params.put("signature", generateHMACSignature(requestMethod, resourcePath, params));
         return params;
     }
-    
+
     private static Map constructFileParams(String[] files) throws FileNotFoundException, IOException, Exception {
         int counter = 0;
         Map map = new HashMap();
@@ -336,6 +336,6 @@ public class JScrambler {
         }
         return encodedStr;
     }
-    
+
     public static final int SUCCESS = 0;
 }
