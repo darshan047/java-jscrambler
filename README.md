@@ -35,11 +35,17 @@ Your JScrambler's project configuration is achieved through a JSON file with the
 {
   "filesSrc": ["index.js", "lib/**/*.js", "lib/*.js"],
   "filesDest": "dist/",
+
   "keys": {
     "accessKey": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-    "secretKey": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    "secretKey": "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
   },
-  "params": {
+
+  "host": "api.jscrambler.com",
+  "port": "443",
+  "apiVersion": "3.8",
+
+  "params":{
     "rename_local": "%DEFAULT%",
     "whitespace": "%DEFAULT%",
     "literal_duplicates": "%DEFAULT%"
