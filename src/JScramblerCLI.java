@@ -28,7 +28,7 @@ public class JScramblerCLI {
       }
       JScramblerFacade.process(args[0]);
     } catch (Exception ex) {
-      System.out.println(ex.toString());
+      System.err.println(ex.toString());
     }
   }
 }

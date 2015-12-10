@@ -123,6 +123,12 @@ public class JScramblerFacade {
     if (object.has("error")) {
       throw new IOException((String) object.get("message"));
     }
+    if (!object.has("id")) {
+      if (!JScramblerFacade.silent) {
+        System.out.println("Response: " + response);
+      }
+      throw new IOException("No id was found in the post response.");
+    }
     if (!JScramblerFacade.silent) {
       System.out.println("Project uploaded");
     }

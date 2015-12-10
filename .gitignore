@@ -1,7 +1,7 @@
 *~
 config.json
-/nbproject
-/build
-/dist/
+nbproject/
+build/
+dist/
 build.xml
 manifest.mf
