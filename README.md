@@ -23,7 +23,7 @@ java-jscrambler
 Requirements
 ------------
 
-JRE 1.6 or above (http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+JRE 1.7 or above (http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 Apache HttpComponents 4.1.2 or above (http://hc.apache.org/downloads.cgi)
 JSON in Java (http://json.org/java/)
 
