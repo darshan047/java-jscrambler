@@ -1,3 +1,10 @@
+## Warning: This project has been discontinued.
+
+#### If you need to integrate your application with Jscrambler please read [our documentation](https://docs.jscrambler.com/code-integrity/documentation/api).
+
+#### You can find Jscrambler's client and integrations [here](https://github.com/jscrambler/jscrambler).
+------------------------------------------------------------------------------
+
 java-jscrambler
 ===============
 
